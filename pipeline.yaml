@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: example-pipeline
+spec:
+  tasks:
+    - name: clone-repository
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: https://github.com/brightzheng100/tekton-pipeline-example.git
+        - name: revision
+          value: main
+    - name: build-image
+      taskRef:
+        name: kaniko
+      params:
+        - name: IMAGE
+          value: <your-ecr-repository-uri>:<image-tag>
+    - name: deploy-to-k8s
+      taskRef:
+        name: kubectl
+      params:
+        - name: KUBECONFIG
+          value: /tekton/home/.kube/config
+        - name: command
+          value: apply
+        - name: arguments
+          value: 
+            - -f
+            - k8s/deployment.yaml
